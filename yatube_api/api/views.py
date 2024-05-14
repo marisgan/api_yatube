@@ -1,13 +1,12 @@
-from django.core.exceptions import PermissionDenied
 from django.shortcuts import get_object_or_404
 from rest_framework import filters, mixins, permissions, serializers, viewsets
 from rest_framework.pagination import LimitOffsetPagination
 
-from posts.models import Comment, Follow, Group, Post
 from .permissions import AuthorOrReadOnly
 from .serializers import (
     CommentSerializer, FollowSerializer, GroupSerializer, PostSerializer
 )
+from posts.models import Comment, Follow, Group, Post
 
 
 class PostViewSet(viewsets.ModelViewSet):
