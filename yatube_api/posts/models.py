@@ -30,7 +30,7 @@ class Post(models.Model):
     )
 
     class Meta(RelatedName.Meta):
-        pass
+        ordering = ('pub_date', 'author')
 
     def __str__(self):
         return f'{self.text[:8]} {self.pub_date} {self.author}'
@@ -45,11 +45,16 @@ class Comment(models.Model):
     )
 
     class Meta(RelatedName.Meta):
-        pass
+        ordering = ('created', 'author')
 
 
 class Follow(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
-    following = models.ForeignKey(
+    user = models.ForeignKey(
         User, on_delete=models.CASCADE, related_name='follows'
     )
+    following = models.ForeignKey(
+        User, on_delete=models.CASCADE
+    )
+
+    class Meta:
+        ordering = ('following',)

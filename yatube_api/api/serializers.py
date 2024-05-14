@@ -54,3 +54,11 @@ class FollowSerializer(serializers.ModelSerializer):
                 message='Вы уже подписаны на этого пользователя'
             ),
         ]
+
+    def validate(self, data):
+        print(data)
+        if data['following'] == self.context['request'].user:
+            raise serializers.ValidationError(
+                'Самоподписка запрещена'
+            )
+        return data

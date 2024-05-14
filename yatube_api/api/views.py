@@ -12,25 +12,24 @@ from posts.models import Comment, Follow, Group, Post
 class PostViewSet(viewsets.ModelViewSet):
     queryset = Post.objects.all()
     serializer_class = PostSerializer
-    permission_classes = (AuthorOrReadOnly,)
+    permission_classes = (
+        AuthorOrReadOnly, permissions.IsAuthenticatedOrReadOnly
+    )
     pagination_class = LimitOffsetPagination
 
     def perform_create(self, serializer):
         serializer.save(author=self.request.user)
 
-    def get_permissions(self):
-        if self.action == 'create':
-            return (permissions.IsAuthenticatedOrReadOnly(),)
-        return super().get_permissions()
-
 
 class CommentViewSet(viewsets.ModelViewSet):
     queryset = Comment.objects.all()
     serializer_class = CommentSerializer
-    permission_classes = (AuthorOrReadOnly,)
+    permission_classes = (
+        AuthorOrReadOnly, permissions.IsAuthenticatedOrReadOnly
+    )
 
     def get_post(self):
-        return get_object_or_404(Post, id=self.kwargs.get('post_id'))
+        return get_object_or_404(Post, id=self.kwargs['post_id'])
 
     def get_queryset(self):
         return self.get_post().comments.all()
@@ -40,11 +39,6 @@ class CommentViewSet(viewsets.ModelViewSet):
             author=self.request.user,
             post=self.get_post()
         )
-
-    def get_permissions(self):
-        if self.action == 'create':
-            return (permissions.IsAuthenticatedOrReadOnly(),)
-        return super().get_permissions()
 
 
 class GroupViewSet(viewsets.ReadOnlyModelViewSet):
@@ -66,11 +60,7 @@ class FollowViewSet(ListCreateViewSet):
     search_fields = ('following__username',)
 
     def get_queryset(self):
-        return Follow.objects.filter(user=self.request.user)
+        return self.request.user.follows.all()
 
     def perform_create(self, serializer):
-        if self.request.user == serializer.validated_data['following']:
-            raise serializers.ValidationError(
-                'Подписываться на самого себя нельзя'
-            )
         serializer.save(user=self.request.user)
